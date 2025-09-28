@@ -1,16 +1,11 @@
-# fighter_ia
+Objetivo/Ideia:
+A ideia é criar um App com uma IA focada em artes marciais mais especificametne o MMA, ainda esta em construção, atualmente estou consumindo um API que tem dados dos lutadores do UFC porem a ideia é conseguir dados de todos os campeonatos de MMA, porem acredito que vou ter que criar algo para percorrer os Sites e obter esses dados, não encontrei nenhuma API para isso.
 
-A new Flutter project.
+Atualmente:
+Atualmente estamos listando todos os lutadores ranqueados do UFC e obtendo os dados pessoais.
 
-## Getting Started
+Proximo passo:
+Proximo passo é encontrar algum ChatIa para fazer uma conexão via API e ela retornar os dados do Lutador, abrir meio que um chat para falar sobre o Lutador especifico
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+obs: 
+A tela de login é so pra bonito KKK 123 para o email e senha.
