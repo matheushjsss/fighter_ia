@@ -10,9 +10,9 @@ class AppWidget extends StatelessWidget {
       animation: AppController.instance,
       builder: (context, child) {
         return MaterialApp(
-          initialRoute: '/',
+          initialRoute: '/home',
           routes: {
-            '/': (context) => LoginPage(),
+            '/': (context) => HomePage(),
             '/home': (context) => HomePage(),
           },
           theme: ThemeData(

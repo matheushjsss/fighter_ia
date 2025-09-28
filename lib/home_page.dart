@@ -2,6 +2,7 @@ import 'package:fighter_ia/SwitcherTheme.button.dart';
 import 'package:fighter_ia/app_controller.dart';
 import 'package:fighter_ia/drawer/drawer_default.dart';
 import 'package:fighter_ia/fightes_list.dart';
+import 'package:fighter_ia/news_list.dart';
 import 'package:fighter_ia/src/repositories/fighters_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -22,11 +23,16 @@ class HomePageState extends State<HomePage> {
       drawer: Drawer(child: DrawerDefault()),
       appBar: AppBar(title: Text("data"), actions: [SwitcherthemeButton()]),
 
-      body: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+      body: SingleChildScrollView(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: [FightesList()],
+          children: [
+            Text("UFC News"),
+            NewsList(search: "UFC"),
+            Text("Mundo da Luta News"),
+            NewsList(search: "MMA"),
+            FightesList(),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(

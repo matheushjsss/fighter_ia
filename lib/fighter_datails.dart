@@ -1,3 +1,4 @@
+import 'package:fighter_ia/news_list.dart';
 import 'package:fighter_ia/src/repositories/fighters_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -65,6 +66,7 @@ class FighterDetailPage extends StatelessWidget {
           _buildHeaderSection(fighterData),
           const SizedBox(height: _sectionSpacing),
           _buildInfoSection(fighterData),
+          _buildNews(fighterData['name']),
         ],
       ),
     );
@@ -112,16 +114,19 @@ class FighterDetailPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoItem('Categoria', fighterData['category']),
+        _buildInfoItem('Categoria', fighterData['category'] ?? ''),
         Text('Cartel:'),
         _buildRecordInfo(fighterData),
         Text('Fisico:'),
-        _buildInfoItem('Idade', fighterData['age']),
+        _buildInfoItem('Idade', fighterData['age'] ?? ''),
         _buildPhysicalInfo(fighterData),
         Text('Pessoal:'),
-        _buildInfoItem('Estilo', fighterData['fightingStyle']),
-        _buildInfoItem('Local de Nascimento', fighterData['placeOfBirth']),
-        _buildInfoItem('Estreia no UFC', fighterData['octagonDebut']),
+        _buildInfoItem('Estilo', fighterData['fightingStyle'] ?? ''),
+        _buildInfoItem(
+          'Local de Nascimento',
+          fighterData['placeOfBirth'] ?? '',
+        ),
+        _buildInfoItem('Estreia no UFC', fighterData['octagonDebut'] ?? ''),
       ],
     );
   }
@@ -150,6 +155,15 @@ class FighterDetailPage extends StatelessWidget {
       'Peso: ${fighterData['weight']} lbs',
       style: const TextStyle(fontSize: 16),
       textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildNews(String name) {
+    return Column(
+      children: [
+        NewsList(search: name),
+        SizedBox(height: 50),
+      ],
     );
   }
 }
