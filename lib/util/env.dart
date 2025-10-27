@@ -1,0 +1,1 @@
+const String keyApiNews = '76ef8cabb9a095b1de077c501e52e859';

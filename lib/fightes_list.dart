@@ -3,7 +3,9 @@ import 'package:fighter_ia/src/repositories/fighters_repository.dart';
 import 'package:flutter/material.dart';
 
 class FightesList extends StatefulWidget {
-  const FightesList({super.key});
+  final String? search;
+
+  const FightesList({super.key, this.search});
 
   @override
   State<FightesList> createState() => _FightesListState();
@@ -31,15 +33,28 @@ class _FightesListState extends State<FightesList> {
 
         final fighters = snapshot.data!;
 
+        // Se houver um termo de busca, filtra a lista (case-insensitive, substring)
+        final searchTerm = widget.search?.trim().toLowerCase() ?? '';
+        final filtered = searchTerm.isEmpty
+            ? fighters
+            : fighters.where((f) => f.name.toLowerCase().contains(searchTerm)).toList();
+
+        final displayList = filtered;
+
+        if (displayList.isEmpty) {
+          return const Center(child: Text('Nenhum lutador encontrado para a busca'));
+        }
+
         return Align(
           alignment: Alignment.centerLeft,
           child: SizedBox(
             width: MediaQuery.of(context).size.width - 100,
             height: MediaQuery.of(context).size.height,
             child: ListView.builder(
-              itemCount: fighters.length,
+              itemCount: displayList.length,
               itemBuilder: (context, index) {
-                final f = fighters[index];
+                final f = displayList[index];
+
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
