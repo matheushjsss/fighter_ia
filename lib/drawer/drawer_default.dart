@@ -1,4 +1,5 @@
 import 'package:fighter_ia/drawer/user_drawer.dart';
+import 'package:fighter_ia/ufc_events_page.dart';
 import 'package:flutter/material.dart';
 
 class DrawerDefault extends StatefulWidget {
@@ -15,17 +16,21 @@ class _DrawerDefaultState extends State<DrawerDefault> {
       children: [
         UserDrawer(),
         ListTile(
-          leading: Icon(Icons.exit_to_app),
-          title: Text('Sair'),
-          subtitle: Text('Sair da conta Logada'),
+          leading: const Icon(Icons.sports_mma, color: Colors.red),
+          title: const Text('UFC'),
+          subtitle: const Text('Eventos e Lutas'),
           onTap: () {
-            Navigator.of(context).pushReplacementNamed('/');
+            Navigator.of(context).pop();
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const UfcEventsPage()),
+            );
           },
         ),
+        const Divider(),
         ListTile(
-          leading: Icon(Icons.exit_to_app),
-          title: Text('Sair'),
-          subtitle: Text('Sair da conta Logada'),
+          leading: const Icon(Icons.exit_to_app),
+          title: const Text('Sair'),
+          subtitle: const Text('Sair da conta Logada'),
           onTap: () {
             Navigator.of(context).pushReplacementNamed('/');
           },
