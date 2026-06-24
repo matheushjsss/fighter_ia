@@ -41,6 +41,7 @@ class NewsRepository {
         a['description'] ?? '',
         a['url'] ?? '',
         a['image'] ?? '',
+        publishedAt: DateTime.tryParse(a['publishedAt'] ?? ''),
       );
     }).toList();
   }

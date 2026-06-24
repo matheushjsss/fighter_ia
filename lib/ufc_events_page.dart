@@ -3,8 +3,23 @@ import 'package:fighter_ia/src/repositories/ufc_repository.dart';
 import 'package:fighter_ia/ufc_fights_page.dart';
 import 'package:flutter/material.dart';
 
-class UfcEventsPage extends StatelessWidget {
+class UfcEventsPage extends StatefulWidget {
   const UfcEventsPage({super.key});
+
+  @override
+  State<UfcEventsPage> createState() => _UfcEventsPageState();
+}
+
+class _UfcEventsPageState extends State<UfcEventsPage> {
+  // O Future é criado UMA vez em initState. Se fosse criado no build(),
+  // cada rebuild dispararia uma nova requisição.
+  late Future<List<UfcEventModel>> _eventsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _eventsFuture = UfcRepository().getEvents();
+  }
 
   String _formatDate(String rawDate) {
     try {
@@ -20,7 +35,7 @@ class UfcEventsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Eventos UFC')),
       body: FutureBuilder<List<UfcEventModel>>(
-        future: UfcRepository().getEvents(),
+        future: _eventsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

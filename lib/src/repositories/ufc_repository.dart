@@ -1,32 +1,51 @@
-import 'dart:convert';
-
+import 'package:fighter_ia/src/http/resilient_http.dart';
 import 'package:fighter_ia/src/models/ufc_event_model.dart';
+import 'package:fighter_ia/src/models/ufc_featured_model.dart';
 import 'package:fighter_ia/src/models/ufc_fight_model.dart';
+import 'package:fighter_ia/src/models/ufc_fight_result_model.dart';
 import 'package:http/http.dart';
 
 class UfcRepository {
   final client = Client();
 
-  // 10.0.2.2 é o localhost do host quando rodando no emulador Android
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
-
   Future<List<UfcEventModel>> getEvents() async {
-    final response = await client.get(Uri.parse('$baseUrl/ufc/events'));
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((e) => UfcEventModel.fromJson(e)).toList();
-    }
-    throw Exception('Erro ao carregar eventos: ${response.statusCode}');
+    final data = await _getList(Uri.parse('$apiBaseUrl/ufc/events'));
+    return data.map((e) => UfcEventModel.fromJson(e)).toList();
   }
 
   Future<List<UfcFightModel>> getFights(int eventId) async {
-    final response = await client.get(
-      Uri.parse('$baseUrl/ufc/events/$eventId/fights'),
+    final data = await _getList(
+      Uri.parse('$apiBaseUrl/ufc/events/$eventId/fights'),
     );
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((e) => UfcFightModel.fromJson(e)).toList();
+    // As imagens vêm do banco (img_body) já no JSON de cada luta.
+    return data.map((e) => UfcFightModel.fromJson(e)).toList();
+  }
+
+  Future<UfcFeaturedModel?> getFeatured() async {
+    final data = await getJsonResilient(
+      client,
+      Uri.parse('$apiBaseUrl/ufc/featured'),
+    );
+    if (data is Map<String, dynamic>) {
+      return UfcFeaturedModel.fromJson(data);
     }
-    throw Exception('Erro ao carregar lutas: ${response.statusCode}');
+    return null;
+  }
+
+  Future<UfcFightResultModel> getFightDetail(int fightId) async {
+    final data = await getJsonResilient(
+      client,
+      Uri.parse('$apiBaseUrl/ufc/fights/$fightId'),
+    );
+    if (data is Map<String, dynamic>) {
+      return UfcFightResultModel.fromJson(data);
+    }
+    throw const FormatException('Resposta inesperada do detalhe da luta');
+  }
+
+  Future<List<dynamic>> _getList(Uri url) async {
+    final decoded = await getJsonResilient(client, url);
+    if (decoded is List) return decoded;
+    throw const FormatException('Resposta não é uma lista JSON');
   }
 }
