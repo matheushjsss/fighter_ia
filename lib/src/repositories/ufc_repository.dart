@@ -1,4 +1,5 @@
 import 'package:fighter_ia/src/http/resilient_http.dart';
+import 'package:fighter_ia/src/models/ufc_event_detail_model.dart';
 import 'package:fighter_ia/src/models/ufc_event_model.dart';
 import 'package:fighter_ia/src/models/ufc_featured_model.dart';
 import 'package:fighter_ia/src/models/ufc_fight_model.dart';
@@ -19,6 +20,17 @@ class UfcRepository {
     );
     // As imagens vêm do banco (img_body) já no JSON de cada luta.
     return data.map((e) => UfcFightModel.fromJson(e)).toList();
+  }
+
+  Future<UfcEventDetailModel> getEventDetail(int eventId) async {
+    final data = await getJsonResilient(
+      client,
+      Uri.parse('$apiBaseUrl/ufc/events/$eventId'),
+    );
+    if (data is Map<String, dynamic>) {
+      return UfcEventDetailModel.fromJson(data);
+    }
+    throw const FormatException('Resposta inesperada do detalhe do evento');
   }
 
   Future<UfcFeaturedModel?> getFeatured() async {

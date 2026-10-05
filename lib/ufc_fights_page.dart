@@ -1,6 +1,10 @@
+import 'package:fighter_ia/src/models/ufc_event_detail_model.dart';
+import 'package:fighter_ia/src/models/ufc_event_model.dart';
 import 'package:fighter_ia/src/models/ufc_fight_model.dart';
 import 'package:fighter_ia/src/repositories/ufc_repository.dart';
+import 'package:fighter_ia/ufc_event_widgets.dart';
 import 'package:fighter_ia/ufc_fight_detail_page.dart';
+import 'package:fighter_ia/util/app_colors.dart';
 import 'package:fighter_ia/util/fighter_nav.dart';
 import 'package:flutter/material.dart';
 
@@ -19,39 +23,285 @@ class UfcFightsPage extends StatefulWidget {
 }
 
 class _UfcFightsPageState extends State<UfcFightsPage> {
-  late Future<List<UfcFightModel>> _fightsFuture;
+  late Future<UfcEventDetailModel> _detailFuture;
 
   @override
   void initState() {
     super.initState();
-    _fightsFuture = UfcRepository().getFights(widget.eventId);
+    _detailFuture = UfcRepository().getEventDetail(widget.eventId);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.eventName)),
-      body: FutureBuilder<List<UfcFightModel>>(
-        future: _fightsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Erro: ${snapshot.error}'));
-          }
-          final fights = snapshot.data ?? [];
-          if (fights.isEmpty) {
-            return const Center(child: Text('Nenhuma luta encontrada'));
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: fights.length,
-            itemBuilder: (context, index) => _FightCard(fight: fights[index]),
-          );
-        },
+      backgroundColor: AppColors.bg,
+      body: SafeArea(
+        child: FutureBuilder<UfcEventDetailModel>(
+          future: _detailFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Column(
+                children: [
+                  _topBar(),
+                  const Expanded(
+                    child: Center(
+                      child:
+                          CircularProgressIndicator(color: AppColors.accent),
+                    ),
+                  ),
+                ],
+              );
+            }
+            if (snapshot.hasError) {
+              return Column(
+                children: [
+                  _topBar(),
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text('Erro: ${snapshot.error}',
+                            style: const TextStyle(color: AppColors.textDim)),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+            final detail = snapshot.data!;
+            final fights = detail.fights;
+            return ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                _topBar(),
+                _eventHeader(detail.event, fights),
+                if (fights.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Center(
+                      child: Text('Card ainda não divulgado',
+                          style: TextStyle(color: AppColors.textDim)),
+                    ),
+                  )
+                else ...[
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: Text(
+                      'CARD PRINCIPAL',
+                      style: TextStyle(
+                        color: AppColors.textDim,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                  ...fights.map((f) => _FightCard(fight: f)),
+                ],
+                const SizedBox(height: 24),
+              ],
+            );
+          },
+        ),
       ),
     );
+  }
+
+  Widget _topBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.info_outline, color: Colors.white),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.ios_share, color: Colors.white),
+            onPressed: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _eventHeader(UfcEventHeaderModel ev, List<UfcFightModel> fights) {
+    final main = fights.isNotEmpty ? fights.first : null;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.stroke),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF23232A), Color(0xFF121214)],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              FcMiniBadge(text: ev.badge),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ev.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      main != null && main.weightClass.isNotEmpty
+                          ? 'MMA · ${main.weightClass}'
+                          : 'MMA',
+                      style: const TextStyle(
+                        color: AppColors.accent,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (main != null) ...[
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _cornerName(
+                    main.redCorner,
+                    main.redRecord,
+                    main.redCountrySigla,
+                    CrossAxisAlignment.start,
+                    TextAlign.start,
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    'VS',
+                    style: TextStyle(
+                      color: AppColors.accent,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: _cornerName(
+                    main.blueCorner,
+                    main.blueRecord,
+                    main.blueCountrySigla,
+                    CrossAxisAlignment.end,
+                    TextAlign.end,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _infoBox('DATA', _formatDate(ev.date)),
+              const SizedBox(width: 8),
+              _infoBox('LOCAL', ev.country.isNotEmpty ? ev.country : '—'),
+              const SizedBox(width: 8),
+              _infoBox('LUTAS', '${ev.fightsCount} cards'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _cornerName(String name, String record, String sigla,
+      CrossAxisAlignment align, TextAlign textAlign) {
+    final rec = [
+      if (record.isNotEmpty) record,
+      if (sigla.isNotEmpty) sigla.toUpperCase(),
+    ].join(' · ');
+    return Column(
+      crossAxisAlignment: align,
+      children: [
+        Text(
+          name.toUpperCase(),
+          textAlign: textAlign,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w900,
+            fontSize: 18,
+            height: 1.05,
+          ),
+        ),
+        if (rec.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              rec,
+              style: const TextStyle(color: AppColors.textDim, fontSize: 12),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _infoBox(String label, String value) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        decoration: BoxDecoration(
+          color: AppColors.chip,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.stroke),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style: const TextStyle(
+                    color: AppColors.textDim,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(String raw) {
+    final dt = DateTime.tryParse(raw);
+    if (dt == null) return raw;
+    return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
   }
 }
 
@@ -143,7 +393,9 @@ class _FightCard extends StatelessWidget {
                         openFighterPage(context, fight.redId, fight.redCorner),
                     child: _FighterSide(
                       name: fight.redCorner,
-                      img: fight.redImg,
+                      img: fight.redImgFace.isNotEmpty
+                          ? fight.redImgFace
+                          : fight.redImg,
                       accent: Colors.red,
                     ),
                   ),
@@ -165,7 +417,9 @@ class _FightCard extends StatelessWidget {
                         openFighterPage(context, fight.blueId, fight.blueCorner),
                     child: _FighterSide(
                       name: fight.blueCorner,
-                      img: fight.blueImg,
+                      img: fight.blueImgFace.isNotEmpty
+                          ? fight.blueImgFace
+                          : fight.blueImg,
                       accent: Colors.blue,
                     ),
                   ),
@@ -231,18 +485,28 @@ class _FighterSide extends StatelessWidget {
     required this.accent,
   });
 
+  static const double _avatar = 88;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            height: 130,
+          // Foto de ROSTO, recortada em círculo com anel na cor do canto.
+          Container(
+            width: _avatar,
+            height: _avatar,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: accent.withValues(alpha: 0.08),
+              border: Border.all(color: accent.withValues(alpha: 0.6), width: 2),
+            ),
+            clipBehavior: Clip.antiAlias,
             child: _buildImage(),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
@@ -265,13 +529,14 @@ class _FighterSide extends StatelessWidget {
     if (img.isEmpty) return _placeholder();
     return Image.network(
       img,
-      fit: BoxFit.contain,
+      fit: BoxFit.cover,
+      alignment: Alignment.topCenter,
       loadingBuilder: (context, child, progress) {
         if (progress == null) return child;
         return const Center(
           child: SizedBox(
-            width: 24,
-            height: 24,
+            width: 22,
+            height: 22,
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
         );
@@ -281,17 +546,6 @@ class _FighterSide extends StatelessWidget {
   }
 
   Widget _placeholder() {
-    return Center(
-      child: Container(
-        width: 90,
-        height: 110,
-        decoration: BoxDecoration(
-          color: accent.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: accent.withValues(alpha: 0.3)),
-        ),
-        child: Icon(Icons.person, size: 48, color: accent.withValues(alpha: 0.5)),
-      ),
-    );
+    return Icon(Icons.person, size: 44, color: accent.withValues(alpha: 0.5));
   }
 }

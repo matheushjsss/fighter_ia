@@ -6,6 +6,16 @@ import 'package:http/http.dart';
 /// 10.0.2.2 é o localhost do host quando rodando no emulador Android.
 const String apiBaseUrl = 'http://10.0.2.2:8000/api';
 
+/// Token compartilhado com o backend. Enviado no header X-App-Token em toda
+/// requisição à API do Laravel; o servidor rejeita (401) quem não o tiver.
+/// Pode ser sobrescrito na build com --dart-define=API_APP_TOKEN=... e deve
+/// bater exatamente com API_APP_TOKEN no .env do Laravel.
+const String apiAppToken = String.fromEnvironment(
+  'API_APP_TOKEN',
+  defaultValue:
+      'db1c2b6618ae632c75b88484a83971fb60c9d950893d71aad926c53f1d1131aa',
+);
+
 /// GET + decode JSON resiliente. O servidor embutido do PHP (php artisan
 /// serve) é single-thread e pode falhar em respostas grandes de duas formas:
 ///   - entregar o corpo com bytes faltando (JSON quebrado) -> FormatException
@@ -20,7 +30,11 @@ Future<dynamic> getJsonResilient(Client client, Uri url) async {
     try {
       final response = await client.get(
         url,
-        headers: {'Connection': 'close', 'Accept': 'application/json'},
+        headers: {
+          'Connection': 'close',
+          'Accept': 'application/json',
+          'X-App-Token': apiAppToken,
+        },
       );
       if (response.statusCode != 200) {
         throw Exception('Erro HTTP ${response.statusCode}');

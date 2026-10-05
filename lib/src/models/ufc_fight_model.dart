@@ -8,6 +8,8 @@ class UfcFightModel {
   final String blueRecord;
   final String redCountry;
   final String blueCountry;
+  final String redCountrySigla;
+  final String blueCountrySigla;
   final String redImg;
   final String blueImg;
   final String redImgFace;
@@ -27,6 +29,8 @@ class UfcFightModel {
     required this.blueRecord,
     required this.redCountry,
     required this.blueCountry,
+    this.redCountrySigla = '',
+    this.blueCountrySigla = '',
     required this.redImg,
     required this.blueImg,
     required this.redImgFace,
@@ -48,6 +52,8 @@ class UfcFightModel {
       blueRecord: json['blue_record'] ?? '',
       redCountry: json['red_country'] ?? '',
       blueCountry: json['blue_country'] ?? '',
+      redCountrySigla: json['red_country_sigla'] ?? '',
+      blueCountrySigla: json['blue_country_sigla'] ?? '',
       redImg: json['red_img'] ?? '',
       blueImg: json['blue_img'] ?? '',
       redImgFace: json['red_img_face'] ?? '',

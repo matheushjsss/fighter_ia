@@ -174,7 +174,8 @@ class _UfcFightDetailPageState extends State<UfcFightDetailPage> {
             ),
           ),
         SizedBox(
-          height: 160,
+          // Imagem de CORPO inteiro, grande, ocupando boa parte da tela.
+          height: 300,
           child: img.isEmpty
               ? _placeholder(accent)
               : Image.network(
